@@ -1,0 +1,239 @@
+Virtual DOM Pieces
+Again, when building a web app in React, we’re not working directly with the browser’s “actual
+DOM” directly, but instead a virtual representation of it. Our job is to provide React with enough
+information to build a JavaScript object that represents what the browser will render.
+But what does this Virtual DOM JavaScript object actually consist of?
+React’s Virtual DOM is a tree of ReactElements.
+Understanding the Virtual DOM, ReactElements, and how they interact with the “actual DOM” is
+a lot easier to understand by working through some examples, which we’ll do below.
+Q: Virtual DOM vs. Shadow DOM, are they the same thing? (A: No)
+Maybe you’ve heard of the “Shadow DOM” and you’re wondering, is the Shadow DOM
+the same thing as the Virtual DOM? The answer is no.
+The Virtual DOM is a tree of JavaScript objects that represent the real DOM elements.
+The Shadow DOM is a form of encapsulation on our elements. Think about using the
+<video> tag in your browser. In a video tag, your browser will create a set of video controls
+such as a play button, a timecode number, a scrubber progress bar etc. These elements aren’t
+part of your “regular DOM”, but instead, part of the “Shadow DOM”.
+
+
+
+ React expects us to provide a Virtual DOM tree. That is, we’re going to give React a set of
+JavaScript objects which React will turn into a real DOM tree.
+The objects that make up the tree will be ReactElements. To create a ReactElement, we use the
+createElement method provided by React.
+For instance, to create a ReactElement that represents a <b> (bold) element in React, type the
+following in the browser console:
+1 var boldElement = React.createElement('b');
+
+
+<script src="vendor/react.js"></script>
+<script src="vendor/react-dom.js"></script>
+
+1 var boldElement = React.createElement('b');
+2 var mountElement = document.querySelector('#root');
+3 // Render the boldElement in the DOM tree
+4 ReactDOM.render(boldElement, mountElement);
+
+
+
+
+For example, to place text in our boldElement, we can pass a string as the third argument in the
+createElement() function from above:
+1 var mountElement = document.querySelector('#root');
+2 // Third argument is the inner text
+3 var boldElement = React.createElement('b', null, "Text (as a string)");
+4 ReactDOM.render(boldElement, mountElement);
+ReactDOM.render(boldElement, mountElement, function() { alert("You Know What We have you covered") })
+
+
+var paragraphElement = React.createElement('p', null, "Text (as a string)");
+ReactDOM.render(paragraphElement, mountElement);
+
+
+We can think of it this way: to describe pages to our browser we write HTML; the HTML is parsed
+by the browser to create HTML Elements which become the DOM.
+HTML works very well for specifying tag hierarchies. It would be nice to represent our React
+component tree using markup, much like we do for HTML.
+This is the idea behind JSX.
+When using JSX, creating the ReactElement objects are handled for us. Instead of calling React.createElement for each element, the equivalent structure in JSX is:
+1 var boldElement = <b>Text (as a string)</b>;
+2 // => boldElement is now a ReactElement
+The JSX parser will read that string and call React.createElement for us
+
+
+We often surround JSX with parenthesis (). Although this is not always technically required, it helps
+us set apart JSX from JavaScript.
+Our browser doesn’t know how to read JSX, so how is JSX possible?
+JSX is transformed into JavaScript by using a pre-processor build-tool before we load it with
+the browser.
+When we write JSX, we pass it through a “compiler” (sometimes we say the code is transpiled) that
+converts the JSX to JavaScript. The most common tool for this is a plugin to babel, which we’ll cover
+later.
+
+
+We’ve seen basic examples of JSX several times in this book already. What is different in this section
+is that we’re going to take a more structured look at the different ways we can use JSX. We’ll cover
+tips for using JSX and then talk about how to handle some tricky cases.
+Let’s look at:
+• attribute expressions
+• child expressions
+• boolean attributes
+• and comments
+
+
+
+JSX Conditional Child Expressions
+Another common pattern is to use a boolean checking expression and then render another element
+conditionally.
+For instance, if we’re building a menu that shows options for an admin user, we might write:
+1 // ...
+2 const renderAdminMenu = function() {
+3 return (<MenuLink to="/users">User accounts</MenuLink>)
+4 }
+5 // ...
+6 const userLevel = this.props.userLevel;
+7 return (
+8 <ul>
+9 <li>Menu</li>
+10 {userLevel === 'admin' && renderAdminMenu()}
+11 </ul>
+12 )
+
+
+
+For instance, if we want to show a <UserMenu> component for a logged in user and a <LoginLink>
+for an anonymous user, we can use this expression
+const Menu = (<ul>{loggedInUser ? <UserMenu /> : <LoginLink />}</ul>)
+
+
+
+JSX Boolean Attributes
+In HTML, the presence of some attributes sets the attribute to true. For instance, a disabled <input>
+HTML element can be defined:
+1 <input name='Name' disabled />
+In React we need to set these as booleans. That is, we need to pass a true or false explicitly as an
+attribute:
+1 // Set the boolean in brackets directly
+2 <input name='Name' disabled={true} />
+3
+4 // ... or use JavaScript variables
+5 let formDisabled = true;
+6 <input name='Name' disabled={formDisabled} />
+If we ever need to enable the input above, then we set formDisabled to false.
+
+
+JSX Comments
+We can define comments inside of JSX by using the curly braces ({}) with comment delimiters (/*
+*/):
+let userLevel = 'admin';
+{/*
+Show the admin menu if the userLevel is 'admin'
+*/}
+{userLevel === 'admin' && <AdminMenu />}
+
+
+
+JSX Spread Syntax
+Sometimes when we have many props to pass to a component, it can be cumbersome to list each
+one individually. Thankfully, JSX has a shortcut syntax that makes this easier.
+For instance, if we have a props object that has two keys:
+
+const props = {msg: "Hello", recipient: "World"}
+We could pass each prop individually like this:
+<Component msg={"Hello"} recipient={"World"} />
+But by using the JSX spread syntax we can do it like this instead:
+<Component {...props} />
+<!-- essentially the same as this: -->
+<Component msg={"Hello"} recipient={"World"} />
+
+
+
+When we want to set the CSS class of an HTML element, we normally use the class attribute in
+the tag:
+1 <div class='box'></div>
+Since JSX is so closely tied to JavaScript, we cannot use identifiers that JavaScript uses in our tag
+attributes. Attributes such as for and class conflict with the JavaScript keywords for and class.
+Instead of using class to identify a class, JSX uses className:
+1 <!-- Same as <div class='box'></div> -->
+2 <div className='box'></div>
+The className attributes works similarly to the class attribute in HTML. It expects to receive a
+string that identifies the class (or classes) associated with a CSS class.
+To pass multiple classes in JSX, we can join an array to convert it to a string:
+var cssNames = ['box', 'alert']
+2 // and use the array of cssNames in JSX
+3 (<div className={cssNames.join(' ')}></div>)
+
+
+class App extends React.Component {
+render() {
+const klass = classnames({
+box: true, // always apply the box class
+alert: this.props.isAlert, // if a prop is set
+severity: this.state.onHighAlert, // with a state
+timed: false // never apply this class
+});
+return (<div className={klass} />)
+}
+}
+
+
+JSX Gotcha: for and htmlFor
+For the same reason we cannot use the class attribute, we cannot apply the for attribute to a <label>
+element. Instead, we must use the attribute htmlFor. The property is a pass-through property in that
+it applies the attribute as for:
+1 <!-- ... -->
+2 <label htmlFor='email'>Email</label>
+3 <input name='email' type='email' />
+4 <!-- ... -->
+
+
+JSX Gotcha: HTML Entities and Emoji
+Entities are reserved characters in HTML which include characters such as less-than <, greater-than
+>, the copyright symbol, etc. In order to display entities, we can just place the entity code in literal
+text.
+
+
+<ul>
+2 <li>phone: &phone;</li>
+3 <li>star: &star;</li>
+4 </ul>
+In order to display entities in dynamic data, we need to surround them in a string inside of curly
+braces ({}). Using unicode directly in JS works as expected. Just as we can send our JS to the browser
+as UTF-8 text directly. Our browser knows how to display UTF-8 code natively.
+Alternatively, instead of using the entity character code, we can use unicode version instead.
+1 return (
+2 <ul>
+3 <li>phone: {'\u0260e'}</li>
+4 <li>star: {'\u2606'}</li>
+5 </ul>
+6 )
+
+
+JSX Gotcha: data-anything
+If we want to apply our own attributes that the HTML spec does not cover, we have to prefix the
+attribute key with the string data-.
+
+
+<div className='box' data-dismissible={true} />
+2 <span data-highlight={true} />
+This requirements only applies to DOM components that are native to HTML and does not mean
+custom components cannot accept arbitrary keys as props. That is, we can accept any attribute on a
+custom component:
+1 <Message dismissible={true} />
+2 <Note highlight={true} />
+There are a standard set of web accessibility47 attributes48 and its a good idea to use them because
+there are many people who will have a hard time using our site without them. We can use any of
+these attribute on an element with the key prepended with the string aria-. For instance, to set the
+hidden attribute:
+<div aria-hidden={true} />
+
+JSX Summary
+JSX isn’t magic. The key thing to keep in mind is that JSX is syntactic sugar to call React.createElement.
+JSX is going to parse the tags we write and then create JavaScript objects. JSX is a convenience
+syntax to help build the component tree.
+As we saw earlier, when we use JSX tags in our code, it gets converted to a ReactElement:
+1 var boldElement = <b>Text (as a string)</b>;
+2 // => boldElement is now a ReactElement
+We can pass that ReactElement to ReactDOM.render and see our code rendered on the page.
+There’s one problem though: ReactElement is stateless and immutable. If we want to add interactivity (with state) into our app, we need another piece of the puzzle: ReactComponent
+
